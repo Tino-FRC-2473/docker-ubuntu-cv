@@ -61,7 +61,7 @@ ADD ./home/ $HOME/
 ### configure startup
 ADD ./run $STARTUPDIR
 RUN $INST_SCRIPTS/set_user_permission.sh $STARTUPDIR $HOME
-RUN echo "root:root" | chpasswd && "default:default" | chpasswd && usermod -aG sudo default
+RUN echo "root:root" | chpasswd && echo "default:default" | chpasswd && usermod -aG sudo default
 
 # Setup timezone
 ENV TZ=America/Los_Angeles
