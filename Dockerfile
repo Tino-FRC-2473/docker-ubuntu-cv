@@ -29,18 +29,29 @@ ADD ./install/ $INST_SCRIPTS/
 RUN find $INST_SCRIPTS -name '*.sh' -exec chmod a+x {} +
 
 ### Install some common tools
-RUN $INST_SCRIPTS/tools.sh
-ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
+RUN apt-get update && apt-get install -y \
+    vim \
+    git \
+    wget \
+    net-tools \
+    locales \
+    bzip2 \
+    python-numpy
 
-### Install custom fonts
-#RUN $INST_SCRIPTS/install_custom_fonts.sh
+RUN locale-gen en_US.UTF-8
+ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
 ### Install xvnc-server & noVNC - HTML5 based VNC viewer
 RUN $INST_SCRIPTS/tigervnc.sh
 RUN $INST_SCRIPTS/no_vnc.sh
 
 ### Install xfce UI
-RUN $INST_SCRIPTS/xfce_ui.sh
+RUN apt-get install -y \
+    supervisor \
+    xfce4 \
+    xfce4-terminal \
+    xterm \
+    && apt-get purge -y pm-utils xscreensaver*
 ADD ./home/ $HOME/
 
 ### configure startup
