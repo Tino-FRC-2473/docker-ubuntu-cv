@@ -11,12 +11,12 @@ ENV DISPLAY=:1 \
     NO_VNC_PORT=6901
 EXPOSE $VNC_PORT $NO_VNC_PORT
 
-### Envrionment config
-ENV HOME=/default \
+### Environment config
+ENV HOME=/home/default \
     TERM=xterm \
     STARTUPDIR=/dockerstartup \
     INST_SCRIPTS=/dockerstartup/install \
-    NO_VNC_HOME=/default/noVNC \
+    NO_VNC_HOME=/home/default/noVNC \
     DEBIAN_FRONTEND=noninteractive \
     VNC_COL_DEPTH=24 \
     VNC_RESOLUTION=1280x1024 \
@@ -33,7 +33,9 @@ RUN apt-get update && apt-get install -y \
     vim \
     git \
     wget \
+    sudo \
     net-tools \
+    inetutils-ping \
     locales \
     bzip2 \
     python-numpy
@@ -52,14 +54,15 @@ RUN apt-get install -y \
     xfce4-terminal \
     xterm \
     && apt-get purge -y pm-utils xscreensaver*
+
+RUN useradd -s /bin/bash default
 ADD ./home/ $HOME/
 
 ### configure startup
-RUN $INST_SCRIPTS/libnss_wrapper.sh
 ADD ./run $STARTUPDIR
 RUN $INST_SCRIPTS/set_user_permission.sh $STARTUPDIR $HOME
-
-USER 1000
+RUN echo "root:root default:default" | chpasswd
+USER default
 
 ENTRYPOINT ["/dockerstartup/vnc_startup.sh"]
 CMD ["--wait"]
