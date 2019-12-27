@@ -19,7 +19,7 @@ ENV HOME=/home/default \
     NO_VNC_HOME=/home/default/noVNC \
     DEBIAN_FRONTEND=noninteractive \
     VNC_COL_DEPTH=24 \
-    VNC_RESOLUTION=1280x1024 \
+    VNC_RESOLUTION=1280x640 \
     VNC_PW=vncpassword \
     VNC_VIEW_ONLY=false
 WORKDIR $HOME
@@ -61,7 +61,12 @@ ADD ./home/ $HOME/
 ### configure startup
 ADD ./run $STARTUPDIR
 RUN $INST_SCRIPTS/set_user_permission.sh $STARTUPDIR $HOME
-RUN echo "root:root default:default" | chpasswd
+RUN echo "root:root" | chpasswd && "default:default" | chpasswd && usermod -aG sudo default
+
+# Setup timezone
+ENV TZ=America/Los_Angeles
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 USER default
 
 ENTRYPOINT ["/dockerstartup/vnc_startup.sh"]
