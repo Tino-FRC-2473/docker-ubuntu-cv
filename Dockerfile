@@ -29,6 +29,8 @@ ADD ./install/ $INST_SCRIPTS/
 RUN find $INST_SCRIPTS -name '*.sh' -exec chmod a+x {} +
 
 ### Install some common tools
+# Patch sources.list to enable fetching build-deps (See https://askubuntu.com/questions/496549/error-you-must-put-some-source-uris-in-your-sources-list)
+RUN cp /etc/apt/sources.list /etc/apt/sources.list~ && sed -Ei 's/^# deb-src /deb-src /' /etc/apt/sources.list
 RUN apt-get update && apt-get install -y \
     vim \
     git \
@@ -38,6 +40,10 @@ RUN apt-get update && apt-get install -y \
     inetutils-ping \
     locales \
     bzip2 \
+    tar \
+    xz-utils \
+    gcc \
+    make \
     python-numpy
 
 RUN locale-gen en_US.UTF-8
@@ -57,6 +63,19 @@ RUN apt-get install -y \
 
 RUN useradd -s /bin/bash default
 ADD ./home/ $HOME/
+
+### Install Python
+ENV PYTHON_VERSION 3.8.1
+RUN wget -q -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz" \
+    && mkdir -p /usr/src/python \
+    && tar -xJC /usr/src/python --strip-components=1 -f python.tar.xz \
+    && rm python.tar.xz \
+    && apt-get build-dep -y python3.5 \
+    && cd /usr/src/python \
+    && ./configure --enable-optimizations \
+    && make -j \
+    && make install \
+    && cd -
 
 ### configure startup
 ADD ./run $STARTUPDIR
