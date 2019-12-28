@@ -77,6 +77,9 @@ RUN wget -q -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION
     && make install \
     && cd -
 
+# Python packages
+RUN pip3 install --upgrade pip && pip3 install numpy scipy matplotlib networkx opencv-python serial
+
 ### configure startup
 ADD ./run $STARTUPDIR
 RUN $INST_SCRIPTS/set_user_permission.sh $STARTUPDIR $HOME
